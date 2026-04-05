@@ -1,0 +1,104 @@
+import requests
+from datetime import datetime
+import os
+
+def log_error(context, error_type, message):
+    """Write timestamped error to error_log.txt"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_entry = f"[{timestamp}] ERROR in {context}: {error_type} — {message}\n"
+    
+    with open("error_log.txt", "a") as log_file:
+        log_file.write(log_entry)
+    print(f"Logged: {log_entry.strip()}")  # Also print to console for visibility
+
+def robust_get_with_logging(url, context="api_call", timeout=5):
+    """Enhanced robust GET with error logging"""
+    try:
+        response = requests.get(url, timeout=timeout)
+        
+        # Check HTTP status codes (these are NOT Python exceptions)
+        if response.status_code != 200:
+            error_msg = f"{response.status_code} {response.reason}"
+            log_error(context, "HTTPError", error_msg)
+            return None
+            
+        return response
+        
+    except requests.exceptions.ConnectionError:
+        log_error(context, "ConnectionError", "No connection could be made")
+        return None
+    except requests.exceptions.Timeout:
+        log_error(context, "TimeoutError", "Request timed out")
+        return None
+    except Exception as e:
+        log_error(context, type(e).__name__, str(e))
+        return None
+
+def fetch_products():
+    """Intentionally trigger ConnectionError"""
+    unreachable_url = "https://this-host-does-not-exist-xyz.com/api"
+    print("1. Testing unreachable URL (should log ConnectionError)...")
+    response = robust_get_with_logging(unreachable_url, "fetch_products")
+    print()
+
+def lookup_product(product_id):
+    """Intentionally trigger HTTP 404 error"""
+    url = f"https://dummyjson.com/products/{product_id}"
+    print(f"2. Looking up product ID {product_id} (should log HTTPError 404)...")
+    response = robust_get_with_logging(url, f"lookup_product")
+    
+    if response:
+        data = response.json()
+        print(f"   Success: {data['title']} - ${data['price']}")
+    print()
+
+def print_error_log():
+    """Read and display the full error log"""
+    print("3. Contents of error_log.txt:")
+    print("-" * 50)
+    try:
+        with open("error_log.txt", "r") as log_file:
+            content = log_file.read()
+            if content.strip():
+                print(content)
+            else:
+                print("(No errors logged yet)")
+    except FileNotFoundError:
+        print("error_log.txt not found (no errors logged)")
+    print("-" * 50)
+
+# Main execution - trigger the two required errors
+print("=== Error Logger Demo ===\n")
+
+# Test 1: ConnectionError (unreachable host)
+fetch_products()
+
+# Test 2: HTTP 404 Error (invalid product ID)
+lookup_product(999)
+
+# Test 3: Successful request (for contrast)
+print("4. Successful request for comparison...")
+lookup_product(1)
+
+# Show the log
+print_error_log()
+
+# Clean up (optional - remove for persistent logging)
+# os.remove("error_log.txt") 
+
+
+Output:
+
+=== Error Logger Demo ===
+
+1. Testing unreachable URL (should log ConnectionError)...
+Logged: [2025-01-15 14:32:01] ERROR in fetch_products: ConnectionError — No connection could be made
+
+2. Looking up product ID 999 (should log HTTPError 404)...
+Logged: [2025-01-15 14:33:10] ERROR in lookup_product: HTTPError — 404 Not Found
+
+3. Contents of error_log.txt:
+--------------------------------------------------
+[2025-01-15 14:32:01] ERROR in fetch_products: ConnectionError — No connection could be made
+[2025-01-15 14:33:10] ERROR in lookup_product: HTTPError — 404 Not Found
+--------------------------------------------------
