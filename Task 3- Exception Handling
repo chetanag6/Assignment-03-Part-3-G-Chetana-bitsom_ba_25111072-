@@ -1,0 +1,116 @@
+import requests
+
+# Part A — Guarded Calculator
+def safe_divide(a, b):
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return "Error: Cannot divide by zero"
+    except TypeError:
+        return "Error: Invalid input types"
+
+print("Part A Tests:")
+print(safe_divide(10, 2))        # Should print: 5.0
+print(safe_divide(10, 0))        # Should print: Error: Cannot divide by zero
+print(safe_divide("ten", 2))     # Should print: Error: Invalid input types
+print()
+
+# Part B — Guarded File Reader
+def read_file_safe(filename):
+    try:
+        with open(filename, 'r') as file:
+            content = file.read()
+            return content
+    except FileNotFoundError:
+        print(f"Error: File '{filename}' not found.")
+        return None
+    finally:
+        print("File operation attempt complete.")
+
+print("Part B Tests:")
+# Create a test file for success case
+with open("python_notes.txt", "w") as f:
+    f.write("These are my Python notes!\nLine 2 here.")
+
+content = read_file_safe("python_notes.txt")
+if content:
+    print(f"File content: {content}")
+
+read_file_safe("ghost_file.txt")
+print()
+
+# Part C — Robust API Calls (Updated from Task 2 structure)
+def robust_get(url, timeout=5):
+    try:
+        response = requests.get(url, timeout=timeout)
+        return response
+    except requests.exceptions.ConnectionError:
+        print("Connection failed. Please check your internet.")
+        return None
+    except requests.exceptions.Timeout:
+        print("Request timed out. Try again later.")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
+def robust_post(url, json_data, timeout=5):
+    try:
+        response = requests.post(url, json=json_data, timeout=timeout)
+        return response
+    except requests.exceptions.ConnectionError:
+        print("Connection failed. Please check your internet.")
+        return None
+    except requests.exceptions.Timeout:
+        print("Request timed out. Try again later.")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
+print("Part C Test:")
+# Test robust API calls
+response = robust_get("https://httpbin.org/delay/1", timeout=2)  # Should timeout
+if response:
+    print(f"Status: {response.status_code}")
+
+response = robust_get("https://httpbin.org/get")
+if response and response.status_code == 200:
+    print("GET request successful!")
+print()
+
+# Part D — Input Validation Loop
+print("Part D — Product Lookup")
+while True:
+    user_input = input("Enter a product ID to look up (1–100), or 'quit' to exit: ").strip()
+    
+    if user_input.lower() == 'quit':
+        print("Goodbye!")
+        break
+    
+    try:
+        product_id = int(user_input)
+        if 1 <= product_id <= 100:
+            # Valid ID, make API call
+            url = f"https://dummyjson.com/products/{product_id}"
+            response = robust_get(url)
+            
+            if response:
+                if response.status_code == 200:
+                    data = response.json()
+                    title = data['title']
+                    price = data['price']
+                    print(f"Product: {title} - Price: ${price}")
+                elif response.status_code == 404:
+                    print("Product not found.")
+                else:
+                    print(f"HTTP Error: {response.status_code}")
+        else:
+            print("Warning: Product ID must be between 1 and 100.")
+            
+    except ValueError:
+        print("Warning: Please enter a valid integer or 'quit'.")
+    print()
+
+Output: 
+
