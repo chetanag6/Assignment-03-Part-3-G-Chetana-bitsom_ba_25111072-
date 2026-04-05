@@ -1,0 +1,52 @@
+# Part A — Write to file
+print("=== Writing to python_notes.txt ===")
+
+# Write initial 5 lines
+with open("python_notes.txt", "w", encoding="utf-8") as file:
+    file.write("Topic 1: Variables store data. Python is dynamically typed.\n")
+    file.write("Topic 2: Lists are ordered and mutable.\n")
+    file.write("Topic 3: Dictionaries store key-value pairs.\n")
+    file.write("Topic 4: Loops automate repetitive tasks.\n")
+    file.write("Topic 5: Exception handling prevents crashes.\n")
+print("File written successfully.")
+
+# Append 2 more lines
+with open("python_notes.txt", "a", encoding="utf-8") as file:
+    file.write("Topic 6: Functions promote code reuse.\n")
+    file.write("Topic 7: Classes enable object-oriented programming.\n")
+print("Lines appended.")
+
+print()
+
+# Part B — Read from file
+print("=== Reading python_notes.txt ===")
+
+lines = []
+try:
+    with open("python_notes.txt", "r", encoding="utf-8") as file:
+        i = 1
+        for line in file:
+            clean_line = line.strip()
+            print(str(i) + ". " + clean_line)
+            lines.append(clean_line)
+            i = i + 1
+    
+    print("\nTotal lines:", len(lines))
+    
+    # Search for keyword
+    keyword = input("\nEnter keyword to search: ").lower()
+    found = False
+    j = 0
+    while j < len(lines):
+        if keyword in lines[j].lower():
+            print("Match found:", lines[j])
+            found = True
+        j = j + 1
+    
+    if not found:
+        print("No lines contain '" + keyword + "'. Try another keyword.")
+        
+except FileNotFoundError:
+    print("Error: python_notes.txt not found!")
+except Exception as e:
+    print("Error reading file:", str(e))

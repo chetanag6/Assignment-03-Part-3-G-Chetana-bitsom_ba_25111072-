@@ -1,0 +1,62 @@
+import requests
+
+BASE_URL = "https://dummyjson.com/products"
+
+# Step 1: Fetch and Display Products
+print(f"{'Step 1: Fetching 20 Products':^60}")
+print("-" * 60)
+
+response = requests.get(f"{BASE_URL}?limit=20")
+data = response.json()
+products = data.get('products', [])
+
+header = f"{'ID':<4} | {'Title':<30} | {'Category':<15} | {'Price':<8} | {'Rating'}"
+print(header)
+print("-" * len(header))
+
+for p in products:
+    print(f"{p['id']:<4} | {p['title'][:30]:<30} | {p['category']:<15} | ${p['price']:<7} | {p['rating']}")
+
+# Step 2: Filter and Sort
+print("\n" + f"{'Step 2: Filter (Rating >= 4.5) & Sort (Price Desc)':^60}")
+print("-" * 60)
+
+# Filter: rating >= 4.5
+filtered_products = [p for p in products if p['rating'] >= 4.5]
+
+# Sort: Price descending
+sorted_products = sorted(filtered_products, key=lambda x: x['price'], reverse=True)
+
+print(header)
+print("-" * len(header))
+for p in sorted_products:
+    print(f"{p['id']:<4} | {p['title'][:30]:<30} | {p['category']:<15} | ${p['price']:<7} | {p['rating']}")
+
+# Step 3: Search by Category
+print("\n" + f"{'Step 3: Laptops Category':^60}")
+print("-" * 60)
+
+laptop_res = requests.get(f"{BASE_URL}/category/laptops")
+laptops = laptop_res.json().get('products', [])
+
+for laptop in laptops:
+    print(f"Laptop: {laptop['title']:<25} | Price: ${laptop['price']}")
+
+# Step 4: POST Request (Simulated)
+print("\n" + f"{'Step 4: Simulated POST Request':^60}")
+print("-" * 60)
+
+new_product = {
+    "title": "My Custom Product",
+    "price": 999,
+    "category": "electronics",
+    "description": "A product I created via API"
+}
+
+post_res = requests.post(f"{BASE_URL}/add", json=new_product)
+
+if post_res.status_code == 201 or post_res.status_code == 200:
+    print("Success! Server Response:")
+    print(post_res.json())
+else:
+    print(f"Failed with status code: {post_res.status_code}")
