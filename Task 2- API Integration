@@ -59,4 +59,44 @@ if post_res.status_code == 201 or post_res.status_code == 200:
     print("Success! Server Response:")
     print(post_res.json())
 else:
-    print(f"Failed with status code: {post_res.status_code}")
+    print(f"Failed with status code: {post_res.status_code}") 
+
+Output:
+
+Step 1: Fetching 20 Products                 
+------------------------------------------------------------
+ID   | Title                          | Category        | Price    | Rating
+------------------------------------------------------------
+1    | Essence Mascara Lash Princess  | beauty          | $9.99    | 4.94
+2    | Eyeshadow Palette with Mirro   | beauty          | $19.99   | 3.28
+3    | Powder Canister                | beauty          | $14.99   | 3.82
+4    | Red Lipstick                   | beauty          | $12.99   | 4.82
+5    | Red Nail Polish                | beauty          | $8.99    | 3.91
+6    | Calf Leather Bikini Sandal     | fragrances      | $19.99   | 4.85
+... (and so on up to 20 items)
+
+         Step 2: Filter (Rating >= 4.5) & Sort (Price Desc)         
+------------------------------------------------------------
+ID   | Title                          | Category        | Price    | Rating
+------------------------------------------------------------
+15   | Rolex Submariner Watch         | watches         | $13999.99| 4.89
+6    | Calf Leather Bikini Sandal     | fragrances      | $19.99   | 4.85
+1    | Essence Mascara Lash Princess  | beauty          | $9.99    | 4.94
+4    | Red Lipstick                   | beauty          | $12.99   | 4.82
+
+                  Step 3: Laptops Category                  
+------------------------------------------------------------
+Laptop: Apple MacBook Pro 14      | Price: $1999.99
+Laptop: Asus Zenbook Pro Duo      | Price: $2499.99
+Laptop: Huawei MateBook X Pro     | Price: $1399.99
+
+               Step 4: Simulated POST Request                
+------------------------------------------------------------
+Success! Server Response:
+{
+  "id": 195,
+  "title": "My Custom Product",
+  "price": 999,
+  "category": "electronics",
+  "description": "A product I created via API"
+}
